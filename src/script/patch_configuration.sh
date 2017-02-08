@@ -19,30 +19,30 @@ function riak_patch_config(){
     # the `allow_mult` parameter to `true` to enable Riak to create siblings, which is necessary for Riak CS to function.
 
     cat <<-EOL > $advancedConfigPath
-        [
-            {eleveldb, [
-                {total_leveldb_mem_percent, 30}
-            ]},
-            {riak_kv, [
-                %% Storage_backend specifies the Erlang module defining the storage mechanism that will be used on this node.
-                {add_paths, ["$(ls -d /usr/lib/riak-cs/lib/riak_cs-*)/ebin"]},
-                {storage_backend, riak_cs_kv_multi_backend},
-                {multi_backend_prefix_list, [{<<"0b:">>, be_blocks}]},
-                {multi_backend_default, be_default},
-                {multi_backend, [
-                    {be_default, riak_kv_eleveldb_backend, [
-                        {max_open_files, 30},
-                        {data_root, "/var/lib/riak/leveldb"}
-                    ]},
-                    {be_blocks, riak_kv_bitcask_backend, [
-                        {data_root, "/var/lib/riak/bitcask"}
-                    ]}
-                ]}
-            ]}
-        ].
-    EOL
+		[
+		    {eleveldb, [
+		        {total_leveldb_mem_percent, 30}
+		    ]},
+		    {riak_kv, [
+		        %% Storage_backend specifies the Erlang module defining the storage mechanism that will be used on this node.
+		        {add_paths, ["$(ls -d /usr/lib/riak-cs/lib/riak_cs-*)/ebin"]},
+		        {storage_backend, riak_cs_kv_multi_backend},
+		        {multi_backend_prefix_list, [{<<"0b:">>, be_blocks}]},
+		        {multi_backend_default, be_default},
+		        {multi_backend, [
+		            {be_default, riak_kv_eleveldb_backend, [
+		                {max_open_files, 30},
+		                {data_root, "/var/lib/riak/leveldb"}
+		            ]},
+		            {be_blocks, riak_kv_bitcask_backend, [
+		                {data_root, "/var/lib/riak/bitcask"}
+		            ]}
+		        ]}
+		    ]}
+		].
+	EOL
 
-    echo ' OK!'
+	echo ' OK!'
 }
 
 function riak_cs_patch_config(){
@@ -55,17 +55,17 @@ function riak_cs_patch_config(){
     # Fixme: ssl currently doesn't work, check back on http://git.io/RxYPrw and update SSL config and user creation URL…
 
     cat <<-EOL > $advancedConfigPath
-        [
-            {riak_cs, [
-                {anonymous_user_creation, true},
-                %%{admin_key, null},
-                %%{admin_secret, null},
-                {cs_root_host, "s3.amazonaws.dev"},
-                {fold_objects_for_list_keys, true},
-                {listener, {"0.0.0.0", 8080}}
-            ]}
-        ].
-    EOL
+		[
+		    {riak_cs, [
+		        {anonymous_user_creation, true},
+		        %%{admin_key, null},
+		        %%{admin_secret, null},
+		        {cs_root_host, "s3.amazonaws.dev"},
+		        {fold_objects_for_list_keys, true},
+		        {listener, {"0.0.0.0", 8080}}
+		    ]}
+		].
+	EOL
 
     echo ' OK!'
 }
@@ -75,15 +75,15 @@ function stanchion_patch_config(){
     local advancedConfigPath='/etc/stanchion/advanced.config'
 
     cat <<-EOL > $advancedConfigPath
-        [
-            {stanchion, [
-                %%{admin_key, null},
-                %%{admin_secret, null}
-            ]}
-        ].
-    EOL
+		[
+		    {stanchion, [
+		        %%{admin_key, null},
+		        %%{admin_secret, null}
+		    ]}
+		].
+	EOL
 
-    echo ' OK!'
+	echo ' OK!'
 }
 
 riak_patch_config
