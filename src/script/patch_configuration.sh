@@ -8,11 +8,12 @@ function riak_patch_config(){
     local advancedConfigPath='/etc/riak/advanced.config'
     local riakConfigPath='/etc/riak/riak.conf'
     
-    
-    sed -i '/storage_backend = bitcask/d'         $riakConfigPath
+    sed -i '/storage_backend = bitcask/d' $riakConfigPath
+    sed -i '/admin.key = admin-key/d'     $riakConfigPath
+
     echo -e "\nbuckets.default.allow_mult = true" >> $riakConfigPath
     echo    "javascript.map_pool_size = 0"        >> $riakConfigPath
-    echo    "javascript.red   uce_pool_size = 0"  >> $riakConfigPath
+    echo    "javascript.reduce_pool_size = 0"     >> $riakConfigPath
     echo    "javascript.hook_pool_size = 0"       >> $riakConfigPath
 
     # Expose the necessary Riak CS modules to Riak and instruct Riak to use the custom backend provided by Riak CS. Set
@@ -48,7 +49,10 @@ function riak_patch_config(){
 function riak_cs_patch_config(){
     echo -n 'Updating Riak-CS configuration…'
     local advancedConfigPath='/etc/riak-cs/advanced.config'
-
+    local riakcsConfigPath='/etc/riak-cs/riak-cs.conf'
+    
+    sed -i '/admin.key = admin-key/d' $riakcsConfigPath
+    
     # Must create an admin user to use Riak CS, also create commented placeholders for key and secret, we'll update them
     # later.
 
@@ -73,6 +77,9 @@ function riak_cs_patch_config(){
 function stanchion_patch_config(){
     echo -n 'Updating Stanchion configuration…'
     local advancedConfigPath='/etc/stanchion/advanced.config'
+    local stanchionConfigPath='/etc/stanchion/stanchion.conf'
+    
+    sed -i '/admin.key = admin-key/d' $stanchionConfigPath
 
     cat <<-EOL > $advancedConfigPath
 		[
