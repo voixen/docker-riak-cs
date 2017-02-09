@@ -56,7 +56,7 @@ function riak_cs_patch_config(){
     # Fixme: ssl currently doesn't work, check back on http://git.io/RxYPrw and update SSL config and user creation URL…
     
     sed -i '/anonymous_user_creation =/d'     $riakcsConfigPath 
-    echo -e"\nanonymous_user_creation = on"    >> $riakcsConfigPath
+    echo -e "\nanonymous_user_creation = on"    >> $riakcsConfigPath
     
     cat <<-EOL > $advancedConfigPath
 		[
