@@ -124,10 +124,15 @@ function basho_service_restart(){
 }
 
 function riak_cs_create_admin(){
-    local riakCsConfigPath='/etc/riak-cs/advanced.config'
-    local stanchionConfigPath='/etc/stanchion/advanced.config'
+    local riakCsConfigPath='/etc/riak-cs/riak-cs.conf'
+    local riakCsConfigAdvancedPath='/etc/riak-cs/advanced.config'
+    local stanchionConfigPath='/etc/stanchion/stanchion.conf'
+    local stanchionConfigAdvancedPath='/etc/stanchion/advanced.config'
+    
+    sed -i '/anonymous_user_creation =/d'   $riakCsConfigPath
+    echo 'anonymous_user_creation = on'  >> $riakCsConfigPath
 
-    if grep --quiet '%%{admin_key, null}' "${riakCsConfigPath}" && grep --quiet '%%{admin_secret, null}' "${riakCsConfigPath}"; then
+    if grep --quiet '%%{admin_key, null}' "${riakCsConfigAdvancedPath}" && grep --quiet '%%{admin_secret, null}' "${riakCsConfigAdvancedPath}"; then
         if [ -n "${RIAK_CS_KEY_ACCESS}" ] && [ -n "${RIAK_CS_KEY_SECRET}" ]; then
             local key_access="${RIAK_CS_KEY_ACCESS}"
             local key_secret="${RIAK_CS_KEY_SECRET}"
@@ -156,12 +161,25 @@ function riak_cs_create_admin(){
                 exit 1
             fi
         fi
+ 
+        sed -i '/anonymous_user_creation =/d'  $riakCsConfigPath
+        echo 'anonymous_user_creation = off' >> $riakCsConfigPath
+        
+        sed -i '/admin.key =/d'                $riakCsConfigPath
+        echo ""                             >> $riakCsConfigPath
+        echo "admin.key = ${key_access}"    >> $riakCsConfigPath
+        echo "admin.secret = ${key_secret}" >> $riakCsConfigPath
+        
+        sed -i '/admin.key =/d'                $stanchionConfigPath
+        echo ""                             >> $stanchionConfigPath
+        echo "admin.key = ${key_access}"    >> $stanchionConfigPath
+        echo "admin.secret = ${key_secret}" >> $stanchionConfigPath
 
-        patchConfig "${riakCsConfigPath}" '\Q{anonymous_user_creation, true}\E' '{anonymous_user_creation, false}'
-        patchConfig "${riakCsConfigPath}" '\Q%%{admin_key, null}\E' '{admin_key, "'"${key_access}"'"}'
-        patchConfig "${riakCsConfigPath}" '\Q%%{admin_secret, null}\E' '{admin_secret, "'"${key_secret}"'"}'
-        patchConfig "${stanchionConfigPath}" '\Q%%{admin_key, null}\E' '{admin_key, "'"${key_access}"'"}'
-        patchConfig "${stanchionConfigPath}" '\Q%%{admin_secret, null}\E' '{admin_secret, "'"${key_secret}"'"}'
+        patchConfig "${riakCsConfigAdvancedPath}" '\Q{anonymous_user_creation, true}\E' '{anonymous_user_creation, false}'
+        patchConfig "${riakCsConfigAdvancedPath}" '\Q%%{admin_key, null}\E' '{admin_key, "'"${key_access}"'"}'
+        patchConfig "${riakCsConfigAdvancedPath}" '\Q%%{admin_secret, null}\E' '{admin_secret, "'"${key_secret}"'"}'
+        patchConfig "${stanchionConfigAdvancedPath}" '\Q%%{admin_key, null}\E' '{admin_key, "'"${key_access}"'"}'
+        patchConfig "${stanchionConfigAdvancedPath}" '\Q%%{admin_secret, null}\E' '{admin_secret, "'"${key_secret}"'"}'
 
         # Create admin credentials.
 
@@ -184,8 +202,8 @@ function riak_cs_create_admin(){
         basho_service_restart 'stanchion' 'Stanchion'
         basho_service_restart 'riak-cs' 'Riak CS'
     else
-        local key_access=$(cat "${riakCsConfigPath}" | pcregrep -o '{admin_key,\h*"\K([^"]*)')
-        local key_secret=$(cat "${riakCsConfigPath}" | pcregrep -o '{admin_secret,\h*"\K([^"]*)')
+        local key_access=$(cat "${riakCsConfigAdvancedPath}" | pcregrep -o '{admin_key,\h*"\K([^"]*)')
+        local key_secret=$(cat "${riakCsConfigAdvancedPath}" | pcregrep -o '{admin_secret,\h*"\K([^"]*)')
 
         cat <<-EOL
 

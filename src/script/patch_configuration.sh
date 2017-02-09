@@ -9,7 +9,6 @@ function riak_patch_config(){
     local riakConfigPath='/etc/riak/riak.conf'
     
     sed -i '/storage_backend = bitcask/d' $riakConfigPath
-    sed -i '/admin.key = admin-key/d'     $riakConfigPath
 
     echo -e "\nbuckets.default.allow_mult = true" >> $riakConfigPath
     echo    "javascript.map_pool_size = 0"        >> $riakConfigPath
@@ -51,13 +50,14 @@ function riak_cs_patch_config(){
     local advancedConfigPath='/etc/riak-cs/advanced.config'
     local riakcsConfigPath='/etc/riak-cs/riak-cs.conf'
     
-    sed -i '/admin.key = admin-key/d' $riakcsConfigPath
-    
     # Must create an admin user to use Riak CS, also create commented placeholders for key and secret, we'll update them
     # later.
 
     # Fixme: ssl currently doesn't work, check back on http://git.io/RxYPrw and update SSL config and user creation URL…
-
+    
+    sed -i '/anonymous_user_creation =/d'     $riakcsConfigPath 
+    echo -e"\nanonymous_user_creation = on"    >> $riakcsConfigPath
+    
     cat <<-EOL > $advancedConfigPath
 		[
 		    {riak_cs, [
@@ -77,9 +77,6 @@ function riak_cs_patch_config(){
 function stanchion_patch_config(){
     echo -n 'Updating Stanchion configuration…'
     local advancedConfigPath='/etc/stanchion/advanced.config'
-    local stanchionConfigPath='/etc/stanchion/stanchion.conf'
-    
-    sed -i '/admin.key = admin-key/d' $stanchionConfigPath
 
     cat <<-EOL > $advancedConfigPath
 		[
