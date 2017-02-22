@@ -53,7 +53,11 @@ Use the following environment variables to configure Riak CS instance:
 - `RIAK_CS_BUCKETS` – colon separated list or buckets to automatically create.
 - `RIAK_CS_KEY_ACCESS`, `RIAK_CS_KEY_SECRET` – config's equivalent of `admin_key` and `admin_secret` respectively.
 
-   > Only use this with a mounted data volume when your data is already created and there is already a user with this credentials. Otherwise the default admin user will not be created and you'll get an error.
+   > If container is configured for the first time and RIAK_CS_KEY_ACCESS/RIAK_CS_KEY_SECRET are set they will be used to create the admin user.
+   >
+   > If RIAK_CS_KEY_ACCESS/RIAK_CS_KEY_SECRET are not specified when the container gets configured a new access token and secret will be created.
+   >
+   > If an already configured container is (re-)started RIAK_CS_KEY_ACCESS/RIAK_CS_KEY_SECRET have to be set correctly.
 
 ## Proxy
 

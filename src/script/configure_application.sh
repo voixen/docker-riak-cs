@@ -4,6 +4,7 @@
 
 cd $(dirname $0)
 
+admin_email=admin@s3.amazonaws.dev
 #
 # @param $1 Riak CS admin key.
 # @param $2 Riak CS admin secret.
@@ -136,6 +137,8 @@ function riak_cs_create_admin(){
         if [ -n "${RIAK_CS_KEY_ACCESS}" ] && [ -n "${RIAK_CS_KEY_SECRET}" ]; then
             local key_access="${RIAK_CS_KEY_ACCESS}"
             local key_secret="${RIAK_CS_KEY_SECRET}"
+            
+            /usr/lib/riak-cs/erts-5.10.3/bin/erl  -name n@127.0.0.1 -setcookie riak -eval "io:format(\"~p\", [rpc:call('riak-cs@127.0.0.1', riak_cs_user, create_user, [\"name\", \"$admin_email\", \"$key_access\",  \"$key_secret\"])])." -s init stop
         else
 
             # Because we call this right after starting riak services, this sometimes fails with 500 status,
@@ -150,7 +153,7 @@ function riak_cs_create_admin(){
                 --retry 10 \
                 --retry-delay 5 \
                 --silent \
-                --data '{"email":"admin@s3.amazonaws.dev", "name":"admin"}')
+                --data "{\"email\":\"$admin_email\", \"name\":\"admin\"}")
 
             local key_access=$(echo -n $credentials | pcregrep -o '"key_id"\h*:\h*"\K([^"]*)')
             local key_secret=$(echo -n $credentials | pcregrep -o '"key_secret"\h*:\h*"\K([^"]*)')
