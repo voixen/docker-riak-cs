@@ -138,7 +138,14 @@ function riak_cs_create_admin(){
             local key_access="${RIAK_CS_KEY_ACCESS}"
             local key_secret="${RIAK_CS_KEY_SECRET}"
             
-            /usr/lib/riak-cs/erts-5.10.3/bin/erl  -name n@127.0.0.1 -setcookie riak -eval "io:format(\"~p\", [rpc:call('riak-cs@127.0.0.1', riak_cs_user, create_user, [\"name\", \"$admin_email\", \"$key_access\",  \"$key_secret\"])])." -s init stop
+            while true ; do 
+              local output="$(/usr/lib/riak-cs/erts-5.10.3/bin/erl -noshell  -name n@127.0.0.1 -setcookie riak -eval "io:format(\"~p\", [rpc:call('riak-cs@127.0.0.1', riak_cs_user, create_user, [\"name\", \"$admin_email\", \"$key_access\",  \"$key_secret\"])])." -s init stop )"
+              [[ $output == "{ok"* ]]  && break
+              echo 'failed creating credentials: error $output'
+              echo "\ntrying again."
+              sleep 5s
+            done
+            echo 'credentials successfully created'
         else
 
             # Because we call this right after starting riak services, this sometimes fails with 500 status,
