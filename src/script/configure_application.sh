@@ -140,7 +140,10 @@ function riak_cs_create_admin(){
             
             while true ; do 
               local output="$(/usr/lib/riak-cs/erts-5.10.3/bin/erl -noshell  -name n@127.0.0.1 -setcookie riak -eval "io:format(\"~p\", [rpc:call('riak-cs@127.0.0.1', riak_cs_user, create_user, [\"name\", \"$admin_email\", \"$key_access\",  \"$key_secret\"])])." -s init stop )"
-              [[ $output == "{ok"* ]]  && break
+              echo "$output"
+              if [[ $output == "{ok"* ]] || [[ $output == "{error,user_already_exists}" ]] ; then
+                break
+              fi
               echo 'failed creating credentials: error $output'
               echo "\ntrying again."
               sleep 5s
