@@ -10,10 +10,16 @@ function riak_patch_config(){
     
     sed -i '/storage_backend = bitcask/d' $riakConfigPath
 
-    echo -e "\nbuckets.default.allow_mult = true" >> $riakConfigPath
-    echo    "javascript.map_pool_size = 0"        >> $riakConfigPath
-    echo    "javascript.reduce_pool_size = 0"     >> $riakConfigPath
-    echo    "javascript.hook_pool_size = 0"       >> $riakConfigPath
+    echo -e "\nbuckets.default.allow_mult = true"          >> $riakConfigPath
+    echo    "javascript.map_pool_size = 0"                 >> $riakConfigPath
+    echo    "javascript.reduce_pool_size = 0"              >> $riakConfigPath
+    echo    "javascript.hook_pool_size = 0"                >> $riakConfigPath
+    echo    "bitcask.merge.thresholds.dead_bytes = 0MB"    >> $riakConfigPath
+    echo    "bitcask.merge.triggers.dead_bytes = 0MB"      >> $riakConfigPath
+    echo    "bitcask.merge.thresholds.small_file = 100MB"  >> $riakConfigPath
+    echo    "bitcask.merge.triggers.fragmentation = 5"     >> $riakConfigPath
+    echo    "buckets.default.n_val = 1"                    >> $riakConfigPath
+    
 
     # Expose the necessary Riak CS modules to Riak and instruct Riak to use the custom backend provided by Riak CS. Set
     # the `allow_mult` parameter to `true` to enable Riak to create siblings, which is necessary for Riak CS to function.
